@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using KindergartenWebServices.Models;
+using KindergartenWebServices.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,9 +25,21 @@ namespace KindergartenWebServices.Controllers
         }
 
         // POST api/<StaffelstufenRechnerController>
+        [Route("/Staffelstufenberechnung")]
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post([FromBody] Kind kind)
         {
+            StaffelstufenRechnerService _rechner = new StaffelstufenRechnerService();
+            
+            if (kind.Familieneinkommen < 0 | kind.AnzahlGeschwister <0)
+            {
+                return BadRequest();
+            }
+
+            _rechner.BerechneStaffelstufe(kind);
+            int staffelstufe = kind.Staffelstufe;
+
+            return Ok(staffelstufe);
         }
 
         // PUT api/<StaffelstufenRechnerController>/5
