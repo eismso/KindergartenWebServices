@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KindergartenWebServices.Models;
 using KindergartenWebServices.Services;
-using SecuringWebApiUsingApiKey.Attributes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace KindergartenWebServices.Controllers
 {
-    [ApiKey]
     [Route("api/[controller]")]
     [ApiController]
     public class StaffelstufenController : ControllerBase
