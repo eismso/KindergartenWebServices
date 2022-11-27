@@ -151,10 +151,7 @@ public class KigaVerwaltungsSoftware
             {
                 Console.WriteLine($"\nFehler: {ergebnis}");
             }
-            //int ergebnisAlsInt = int.Parse(ergebnis);
-           
-
-
+ 
             Console.WriteLine("\nSoll das Programm jetzt beendet werden? (Y/N)");
             string abfrage = Console.ReadLine();
             switch (abfrage)
