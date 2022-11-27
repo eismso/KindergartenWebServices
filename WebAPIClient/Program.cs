@@ -1,17 +1,15 @@
-﻿using System.Net.Http.Json;
-using KindergartenWebServices;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using System.Text;
-using System.Net.Http;
-using System.Text.Json.Serialization;
-using System;
 
 
 public class KigaVerwaltungsSoftware
 {
+    static HttpClient client = new HttpClient();
+
     public class Kind
     {
+        
         //[Required]
         public int KindId { get; set; }
 
@@ -80,68 +78,102 @@ public class KigaVerwaltungsSoftware
 
         public int Staffelstufe { get; set; }
         public float Betreuungsbeitrag { get; set; }
+        
     }
 
     public static void Main ()
     {
-        Console.WriteLine("Willkommen in deiner KIGA-Verwaltungs-App!");
-        Console.WriteLine("Bitte gib die Daten des neuen Kindes ein:");
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("Willkommen in deiner KIGA-Verwaltungs-App!\n");
+        Console.WriteLine("Für die Staffelstufenberechnung gib bitte die Daten des Kindes ein:\n");
 
-        Kind request = new Kind();
+        bool berechnen = true;
 
-        request.KindId= 1;
+        while (berechnen)
+        {
+            Kind request = new Kind();
 
-        Console.WriteLine("Nachname des Kindes:");
-        request.Nachname = Console.ReadLine();
+            request.KindId = 1;
 
-        Console.WriteLine("Vorname des Kindes:");
-        request.Vorname = Console.ReadLine();
+            Console.WriteLine("Nachname des Kindes:");
+            request.Nachname = Console.ReadLine();
 
-        Console.WriteLine("SVN des Kindes:");
-        request.SVN = Console.ReadLine();
+            Console.WriteLine("Vorname des Kindes:");
+            request.Vorname = Console.ReadLine();
 
-        request.Geburtstag = 4;
-        request.Geburtsmonat = 2;
-        request.Geburtsjahr = 2018;
+            Console.WriteLine("SVN des Kindes:");
+            request.SVN = Console.ReadLine();
 
-        Console.WriteLine("PLZ des Hauptwohnsitzes des Kindes:");
-        request.HauptwohnsitzPLZ = Console.ReadLine();
+            Console.WriteLine("Familieneinkommen:");
+            request.Familieneinkommen = float.Parse(Console.ReadLine());
 
-        Console.WriteLine("Ort des Hauptwohnsitzes des Kindes:");
-        request.HauptwohnsitzOrt = Console.ReadLine();
+            Console.WriteLine("Geschwisteranzahl des Kindes:");
+            request.AnzahlGeschwister = int.Parse(Console.ReadLine());
 
-        Console.WriteLine("Adresse des Hauptwohnsitzes des Kindes:");
-        request.HauptwohnsitzAdresse = Console.ReadLine();
+            // dummy data
+            request.Geburtstag = 4;
+            request.Geburtsmonat = 2;
+            request.Geburtsjahr = 2018;
+            request.HauptwohnsitzAdresse = "Lindengasse 33";
+            request.HauptwohnsitzPLZ = "8045";
+            request.HauptwohnsitzOrt = "Graz";
+            request.ErzBerechtiger1Nachname = "Testfrau";
+            request.ErzBerechtiger1Vorname = "Susi";
+            request.ErzBerechtiger1SVN = "1234123412";
+            request.ErzBerechtiger2Nachname = "Testmann";
+            request.ErzBerechtiger2Vorname = "Peter";
+            request.ErzBerechtiger2SVN = "8888134512";
+            request.RechnungAdresse = "Lindengasse 33";
+            request.RechnungPLZ = "8045";
+            request.RechnungOrt = "Graz";
+            request.EmailRechnung = "muster@gmail.com";
+            request.Betreuungsart = "KK";
+            request.Betreuungsumfang = "7-9";
 
-        request.ErzBerechtiger1Nachname = "Testfrau";
-        request.ErzBerechtiger1Vorname = "Susi";
-        request.ErzBerechtiger1SVN = "1234";
-        request.ErzBerechtiger2Nachname = "Testmann";
-        request.ErzBerechtiger2Vorname = "Peter";
-        request.ErzBerechtiger2SVN = "8888";
-        request.RechnungAdresse = "Lindengasse 33";
-        request.RechnungPLZ = "8045";
-        request.RechnungOrt = "Graz";
-        request.EmailRechnung = "muster@gmail.com";
-        request.Betreuungsart = "Kindergarten";
-        request.Betreuungsumfang = "8h pro Woche";
-        request.Familieneinkommen = 3000;
-        request.AnzahlGeschwister = 2;
+            string ergebnis = PostStaffelstufe(request).Result;
+            Console.WriteLine($"\nDie Berechnung ergibt Staffelstufe {ergebnis}");
 
+
+            Console.WriteLine("\nSoll das Programm jetzt beendet werden? (Y/N)");
+            string abfrage = Console.ReadLine();
+            switch (abfrage)
+            {
+                case "y":
+                case "Y":
+                    berechnen = false;
+                    Console.WriteLine("Programm wird beendet...");
+                    Thread.Sleep(3000);
+                    Environment.Exit(0);
+                    break;
+                case "n":
+                case "N":
+                    Console.WriteLine("\nGib weitere Daten zur Berechnung ein:\n");
+                    break;
+            }
+        }
     }
 
-    private static void Post(Kind request)
+    
+     public static async Task<string> PostStaffelstufe(Kind request)
     {
         var json = JsonConvert.SerializeObject(request);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
-        HttpClient client = new HttpClient();
 
-        string url = "https://localhost:7270/api/kind";
+        string message = "Fehler: Staffelstufe konnte nicht berechnet werden." +
+            "\n Überprüfe die Werte";
 
-        var response = client.PostAsync(url, data).Result;
-
-        var result = response.Content.ReadAsStringAsync();
-        Console.WriteLine(result);
+        string url = "https://localhost:7270/Staffelstufenberechnung";
+        var response = await client.PostAsync(url, data);
+        var result = await response.Content.ReadAsStringAsync();
+        
+        if (result !=null)
+        {
+            return result;
+        }
+        else
+        {           
+            return message;
+        }
     }
 
 }
