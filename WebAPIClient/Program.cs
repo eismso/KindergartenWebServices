@@ -149,7 +149,7 @@ public class KigaVerwaltungsSoftware
             }
             else
             {
-                Console.WriteLine($"\nFehler: {ergebnis}");
+                Console.WriteLine($"\nFehler:\n{ergebnis}");
             }
  
             Console.WriteLine("\nSoll das Programm jetzt beendet werden? (Y/N)");
