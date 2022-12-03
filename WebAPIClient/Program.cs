@@ -5,8 +5,7 @@ using System.Text;
 
 public class KigaVerwaltungsSoftware
 {
-    static HttpClient client = new HttpClient();
-
+   
     public class Kind
     {
         //ID wird in Kinderdatenbank erstellt
@@ -140,16 +139,20 @@ public class KigaVerwaltungsSoftware
             request.Betreuungsart = "KK";
             request.Betreuungsumfang = "7-9";
 
+            PostKind(request);
+
             string ergebnis = PostStaffelstufe(request).Result;
             int ergebnisAlsInt = 0;
             bool canConvert = int.TryParse(ergebnis, out ergebnisAlsInt);
             if (canConvert)
             {
-                Console.WriteLine($"\nDie Berechnung ergibt Staffelstufe {ergebnisAlsInt}");
+                Console.WriteLine($"\nDie Berechnung ergibt Staffelstufe {ergebnisAlsInt}.");
             }
             else
             {
-                Console.WriteLine($"\nFehler:\n{ergebnis}");
+                string start = "\"errors\":";
+                string fehlermeldung = ergebnis.Substring(ergebnis.IndexOf(start));
+                Console.WriteLine($"\nFehler:\n{fehlermeldung}");
             }
  
             Console.WriteLine("\nSoll das Programm jetzt beendet werden? (Y/N)");
@@ -171,11 +174,33 @@ public class KigaVerwaltungsSoftware
         }
     }
 
-    
-     public static async Task<string> PostStaffelstufe(Kind request)
+
+    public static void PostKind(Kind request)
     {
         var json = JsonConvert.SerializeObject(request);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
+        HttpClient client = new HttpClient();
+        client.DefaultRequestHeaders.Add("ApiKey", "RsIjnvvH3Smgb8ORIypYcBZyD4xnwcgdQJQQiLw0rhPYsZkX1HZ8TgAbZlMUYEeHoLQKvaU");
+
+        string url = "https://localhost:7270/api/Kind";
+        var response = client.PostAsync(url, data).Result;
+
+        if (response != null && response.ReasonPhrase =="Created")
+        {
+            Console.WriteLine($"\nKind '{request.Vorname} {request.Nachname}' wurde erfolgreich angelegt.");
+
+        }
+        else
+        {
+            Console.WriteLine("\nFehler:\nKind konnte nicht angelegt werden.");          
+        }
+    }
+
+    public static async Task<string> PostStaffelstufe(Kind request)
+    {
+        var json = JsonConvert.SerializeObject(request);
+        var data = new StringContent(json, Encoding.UTF8, "application/json");
+        HttpClient client = new HttpClient();
 
         string message = "Fehler: Staffelstufe konnte nicht berechnet werden." +
             "\n Überprüfe die Werte";
