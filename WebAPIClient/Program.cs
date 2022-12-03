@@ -235,9 +235,7 @@ public class KigaVerwaltungsSoftware
         {           
             return message;
         }
-    }
-
-    
+    }  
     public static void PutKind(Kind request)
     {
         var json = JsonConvert.SerializeObject(request);
@@ -255,7 +253,7 @@ public class KigaVerwaltungsSoftware
         }
         else
         {
-            Console.WriteLine("\nFehler:\nno update");
+            Console.WriteLine("\nFehler:\nStaffelstufe konnte nicht hinzugefügt werden.");
         }
     }
     
