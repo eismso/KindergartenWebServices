@@ -85,6 +85,7 @@ namespace KindergartenWebServices.Controllers
         public Kind Put(int id, [FromBody] Kind kindVar)
         {
             var kind = kindList.Where(k => k.KindId == id).FirstOrDefault();
+            kind.Staffelstufe = kindVar.Staffelstufe;
             kind.Betreuungsart = kindVar.Betreuungsart;
             kind.Betreuungsumfang = kindVar.Betreuungsumfang;
             return kind;

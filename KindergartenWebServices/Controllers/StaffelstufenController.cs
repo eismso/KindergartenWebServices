@@ -40,9 +40,9 @@ namespace KindergartenWebServices.Controllers
                 {
                     kind.Staffelstufe -= reduktionswert;
                 }
-                if (kind.Staffelstufe < 0)
+                if (kind.Staffelstufe < 1)
                 {
-                    kind.Staffelstufe = 0;
+                    kind.Staffelstufe = 1;
                 }
             }
             int staffelstufe = kind.Staffelstufe;

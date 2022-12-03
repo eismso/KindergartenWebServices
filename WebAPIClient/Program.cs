@@ -139,13 +139,26 @@ public class KigaVerwaltungsSoftware
             request.Betreuungsart = "KK";
             request.Betreuungsumfang = "7-9";
 
-            PostKind(request);
+            string idFromPost = PostKind(request).Result;
+            string match = ":";
+            string newId = idFromPost.Substring(idFromPost.IndexOf(match)+1, 1);
+            int newIdAsInt = 0;
+            bool canConvertId = int.TryParse(newId, out newIdAsInt);
+            if (canConvertId)
+            {
+                request.KindId = newIdAsInt;   
+            }
+            else
+            {
+                Console.WriteLine($"\nFehler: ID konnte nicht erzeugt werden.");
+            }
 
             string ergebnis = PostStaffelstufe(request).Result;
             int ergebnisAlsInt = 0;
             bool canConvert = int.TryParse(ergebnis, out ergebnisAlsInt);
             if (canConvert)
             {
+                request.Staffelstufe = ergebnisAlsInt;
                 Console.WriteLine($"\nDie Berechnung ergibt Staffelstufe {ergebnisAlsInt}.");
             }
             else
@@ -155,6 +168,8 @@ public class KigaVerwaltungsSoftware
                 Console.WriteLine($"\nFehler:\n{fehlermeldung}");
             }
  
+            PutKind(request);
+
             Console.WriteLine("\nSoll das Programm jetzt beendet werden? (Y/N)");
             string abfrage = Console.ReadLine();
             switch (abfrage)
@@ -175,7 +190,7 @@ public class KigaVerwaltungsSoftware
     }
 
 
-    public static void PostKind(Kind request)
+     public static async Task<string> PostKind(Kind request)
     {
         var json = JsonConvert.SerializeObject(request);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
@@ -183,16 +198,19 @@ public class KigaVerwaltungsSoftware
         client.DefaultRequestHeaders.Add("ApiKey", "RsIjnvvH3Smgb8ORIypYcBZyD4xnwcgdQJQQiLw0rhPYsZkX1HZ8TgAbZlMUYEeHoLQKvaU");
 
         string url = "https://localhost:7270/api/Kind";
-        var response = client.PostAsync(url, data).Result;
+        var response = await client.PostAsync(url, data);
+        var result = await response.Content.ReadAsStringAsync();
+        
 
         if (response != null && response.ReasonPhrase =="Created")
         {
             Console.WriteLine($"\nKind '{request.Vorname} {request.Nachname}' wurde erfolgreich angelegt.");
-
+            return result;
         }
         else
         {
-            Console.WriteLine("\nFehler:\nKind konnte nicht angelegt werden.");          
+            return "\nFehler:\nKind konnte nicht angelegt werden.";
+            
         }
     }
 
@@ -218,6 +236,29 @@ public class KigaVerwaltungsSoftware
             return message;
         }
     }
+
+    
+    public static void PutKind(Kind request)
+    {
+        var json = JsonConvert.SerializeObject(request);
+        var data = new StringContent(json, Encoding.UTF8, "application/json");
+        HttpClient client = new HttpClient();
+        client.DefaultRequestHeaders.Add("ApiKey", "RsIjnvvH3Smgb8ORIypYcBZyD4xnwcgdQJQQiLw0rhPYsZkX1HZ8TgAbZlMUYEeHoLQKvaU");
+
+        string url = $"https://localhost:7270/api/Kind/{request.KindId}";
+        var response = client.PutAsync(url, data).Result;
+
+        if (response != null)
+        {
+            Console.WriteLine($"\nStaffelstufe wurde erfolgreich bei {request.Vorname} {request.Nachname} mit ID: {request.KindId} hinzugefügt.");
+
+        }
+        else
+        {
+            Console.WriteLine("\nFehler:\nno update");
+        }
+    }
+    
 
 }
 
